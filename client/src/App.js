@@ -11,13 +11,9 @@ class App extends Component {
     super(props) 
 
     this.state = {
-      latitude: 43.847950,
-      longitude: -79.346095,
-      restaurant: {
-        name: "Nando's",
-        rating: 4,
-        location: "123 Fake Street"
-      }
+      latitude: null,
+      longitude: null,
+      restaurant: null
     }
   }
 
@@ -26,11 +22,13 @@ class App extends Component {
       this.setState({
         latitude: position.coords.latitude,
         longitude: position.coords.longitude
+      }, () => {
+        this.getNextRestaurant();
       })
     });
   }
 
-  shuffle = () => {
+  getNextRestaurant = () => {
     axios.get(BASE_SERVER_URL + "/api/restaurants?latitude=" + this.state.latitude + "&longitude=" + this.state.longitude)
     .then(res => {
       let restaurant = res.data[0];
@@ -49,16 +47,30 @@ class App extends Component {
   }
 
   render() {
-    return (
-      <div className="App">
-        <h2>{this.state.restaurant.name}</h2>
-        <h2>{this.state.restaurant.rating}</h2>
-        <h2>{this.state.restaurant.location}</h2>
-        <Button onClick={this.shuffle} variant="contained" color="primary">
-          Shuffle
-        </Button>
-      </div>
-    );
+    if(this.state.restaurant && this.state.latitude && this.state.longitude) {
+      return (
+        <div className="App">
+          <h2>{this.state.restaurant.name}</h2>
+          <h2>{this.state.restaurant.rating}</h2>
+          <h2>{this.state.restaurant.location}</h2>
+          <Button onClick={this.getNextRestaurant} variant="contained" color="primary">
+            Shuffle
+          </Button>
+        </div>
+      );
+    } else if (!this.state.latitude && !this.state.longitude) {
+      return (
+        <div className="App">
+          <h2>Waiting for geolocation information...</h2>
+        </div>
+      );
+    } else if (!this.state.restaurant) {
+      return (
+        <div className="App">
+          <h2>Getting new restaurant...</h2>
+        </div>
+      );
+    }
   }
 }
 
