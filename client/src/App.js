@@ -22,7 +22,7 @@ class App extends Component {
   }
 
   shuffle = () => {
-    axios.get(BASE_SERVER_URL + "/restaurants?latitude=" + this.state.latitude + "&" + "?longitude=" + this.state.longitude)
+    axios.get(BASE_SERVER_URL + "/restaurants?latitude=" + this.state.latitude + "&longitude=" + this.state.longitude)
     .then(res => {
       this.setState({
         restaurant: {
