@@ -11,8 +11,8 @@ class App extends Component {
     super(props) 
 
     this.state = {
-      latitude: 123,
-      longitude: 432,
+      latitude: 43.847950,
+      longitude: -79.346095,
       restaurant: {
         name: "Nando's",
         rating: 4,
@@ -22,13 +22,15 @@ class App extends Component {
   }
 
   shuffle = () => {
-    axios.get(BASE_SERVER_URL + "/restaurants?latitude=" + this.state.latitude + "&longitude=" + this.state.longitude)
+    axios.get(BASE_SERVER_URL + "/api/restaurants?latitude=" + this.state.latitude + "&longitude=" + this.state.longitude)
     .then(res => {
+      let restaurant = res.data[0];
+
       this.setState({
         restaurant: {
-          name: res.name,
-          rating: res.rating,
-          location: res.location.address1
+          name: restaurant.name,
+          rating: restaurant.rating,
+          location: restaurant.location.address1
         }
       }) 
     })
