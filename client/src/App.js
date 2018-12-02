@@ -21,6 +21,15 @@ class App extends Component {
     }
   }
 
+  componentDidMount() {
+    navigator.geolocation.getCurrentPosition((position) => {
+      this.setState({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude
+      })
+    });
+  }
+
   shuffle = () => {
     axios.get(BASE_SERVER_URL + "/api/restaurants?latitude=" + this.state.latitude + "&longitude=" + this.state.longitude)
     .then(res => {
