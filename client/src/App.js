@@ -11,7 +11,9 @@ class App extends Component {
     super(props) 
 
     this.state = {
-      message: "Getting geolocation information..."
+      message: "Getting geolocation information...",
+      offset: 0,
+      limit: 50
     }
   }
 
@@ -59,7 +61,7 @@ class App extends Component {
   }
 
   fetchRestaurants = () => {
-    axios.get(BASE_SERVER_URL + "/api/restaurants?latitude=" + this.state.latitude + "&longitude=" + this.state.longitude)
+    axios.get(BASE_SERVER_URL + "/api/restaurants?latitude=" + this.state.latitude + "&longitude=" + this.state.longitude + "&offset=" + this.state.offset + "&limit=" + this.state.limit)
     .then(res => {
       this.setState({
         restaurants: res.data,
@@ -74,27 +76,37 @@ class App extends Component {
   }
 
   getNextRestaurant = () => {
-    let randomNumber = this.getRandomNumber(this.state.restaurants.length - 1);
-    let restaurant = this.state.restaurants[randomNumber];
-    this.setState(prevState => ({
-      restaurant: {
-        name: restaurant.name,
-        rating: restaurant.rating,
-        location: restaurant.location.address1
-      },
-      restaurants: prevState.restaurants.filter((_, i) => i !== randomNumber),
-      message: null
-    }), () => {
-      console.log(this.state.restaurants)
-    });
+    if (this.state.restaurants.length === 0) {
+      this.setState(prevState => ({
+        message: "Getting restaurant information...",
+        offset: prevState.offset + prevState.limit
+      }), () => {
+        this.fetchRestaurants();
+      });
+    } else {
+      let randomNumber = this.getRandomNumber(this.state.restaurants.length);
+      let restaurant = this.state.restaurants[randomNumber];
+
+      this.setState(prevState => ({
+        restaurant: {
+          name: restaurant.name,
+          rating: restaurant.rating,
+          location: restaurant.location.address1
+        },
+        restaurants: prevState.restaurants.filter((_, i) => i !== randomNumber),
+        message: null
+      }), () => {
+        console.log(this.state.restaurants)
+      });
+    }
   }
 
   getRandomNumber = (max) => {
-    return Math.floor(Math.random() * (max + 1) );
+    return Math.floor(Math.random() * max);
   }
 
   render() {
-    if(this.state.restaurant) {
+    if(!this.state.message && this.state.restaurant) {
       return (
         <div className="App">
           <h2>{this.state.restaurant.name}</h2>

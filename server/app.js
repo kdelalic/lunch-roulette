@@ -10,6 +10,8 @@ app.get('/api/restaurants', (req, res) => {
   
   const latitude = req.query.latitude;
   const longitude = req.query.longitude;
+  const offset = req.query.offset;
+  const limit = req.query.limit;
 
   axios({
     url: 'https://api.yelp.com/v3/graphql',
@@ -18,7 +20,7 @@ app.get('/api/restaurants', (req, res) => {
                'Content-Type': 'application/graphql' },
     data: 
       `{
-        search(term: "burrito", latitude: `+ latitude + `, longitude: ` + longitude + `, limit: 50, sort_by: "distance") {
+        search(term: "restaurants", latitude: ` + latitude + `, longitude: ` + longitude + `, limit: ` + limit + `, offset: ` + offset + `) {
           business {
             name
             rating
@@ -31,9 +33,7 @@ app.get('/api/restaurants', (req, res) => {
         }
       }`
   }).then((result) => {
-    let test = result.data.data.search.business;
-
-    res.send(test);
+    res.send(result.data.data.search.business);
   }).catch((err) => {
     console.log("GET/api/restaurants " + err);
   });
