@@ -18,7 +18,7 @@ app.get('/api/restaurants', (req, res) => {
                'Content-Type': 'application/graphql' },
     data: 
       `{
-        search(term: "burrito", latitude: `+ latitude + `, longitude: ` + longitude + `, limit: 3, sort_by: "distance") {
+        search(term: "burrito", latitude: `+ latitude + `, longitude: ` + longitude + `, limit: 50, sort_by: "distance") {
           business {
             name
             rating
@@ -35,7 +35,7 @@ app.get('/api/restaurants', (req, res) => {
 
     res.send(test);
   }).catch((err) => {
-    console.log("ERR " + err);
+    console.log("GET/api/restaurants " + err);
   });
 });
 
