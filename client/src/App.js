@@ -61,7 +61,7 @@ class App extends Component {
   }
 
   fetchRestaurants = () => {
-    axios.get(BASE_SERVER_URL + "/api/restaurants?latitude=" + this.state.latitude + "&longitude=" + this.state.longitude + "&offset=" + this.state.offset + "&limit=" + this.state.limit)
+    axios.get(BASE_SERVER_URL + "/api/graphql/restaurants?latitude=" + this.state.latitude + "&longitude=" + this.state.longitude + "&offset=" + this.state.offset + "&limit=" + this.state.limit)
     .then(res => {
       this.setState({
         restaurants: res.data,

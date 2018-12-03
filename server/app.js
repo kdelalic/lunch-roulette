@@ -6,7 +6,7 @@ const port = 3001;
 
 app.use(cors());
 
-app.get('/api/restaurants', (req, res) => {
+app.get('/api/graphql/restaurants', (req, res) => {
   
   const latitude = req.query.latitude;
   const longitude = req.query.longitude;
@@ -34,6 +34,24 @@ app.get('/api/restaurants', (req, res) => {
       }`
   }).then((result) => {
     res.send(result.data.data.search.business);
+  }).catch((err) => {
+    console.log("GET/api/graphql/restaurants " + err);
+  });
+});
+
+app.get('/api/restaurants', (req, res) => {
+  
+  const latitude = req.query.latitude;
+  const longitude = req.query.longitude;
+  const offset = req.query.offset;
+  const limit = req.query.limit;
+
+  axios({
+    url: 'https://api.yelp.com/v3/businesses/search?term=burritos&latitude=' + latitude + '&longitude=' + longitude + '&offset=' + offset + '&limit=' + limit,
+    method: 'get',
+    headers: { 'Authorization': 'Bearer tKcIaEyXmxDUFrtM3EYISnLxsI22snBqDH9x6yTAXnB_ZhAz-DB_k4BzIJGlcm9-EFO94wQVxQRuqFZp0M_I8EoDFDHlYXGeXmHD44Sk6LSM1LfUlfAu8ZInwk78W3Yx'}
+  }).then((result) => {
+    res.send(result.data.businesses);
   }).catch((err) => {
     console.log("GET/api/restaurants " + err);
   });
