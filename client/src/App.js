@@ -1,9 +1,9 @@
-import React, {Component} from "react";
-import Button from "@material-ui/core/Button";
-import axios from "axios";
-import "./App.css";
+import React, {Component} from 'react';
+import Button from '@material-ui/core/Button';
+import axios from 'axios';
+import './App.css';
 
-const BASE_SERVER_URL = "http://localhost:3001";
+const BASE_SERVER_URL = 'http://localhost:3001';
 const LIMIT = 50;
 const RESTAURANT_RESET = 900;
 
@@ -13,34 +13,35 @@ class App extends Component {
 
         // window.localStorage.clear();
 
-        const prevOffset = parseInt(window.localStorage.getItem("prevOffset"));
+        const prevOffset = parseInt(
+            window.localStorage.getItem('prevOffset'),
+            10
+        );
         const prevRestaurants = JSON.parse(
-            window.localStorage.getItem("prevRestaurants")
+            window.localStorage.getItem('prevRestaurants')
         );
 
-        console.log("prevOffset", prevOffset);
-        console.log("prevRestaurants", prevRestaurants);
+        console.log('prevOffset', prevOffset);
+        console.log('prevRestaurants', prevRestaurants);
 
         this.state = {
             offset:
-                isNaN(prevOffset) || prevOffset > RESTAURANT_RESET
-                    ? 0
-                    : prevOffset,
+                prevOffset || prevOffset > RESTAURANT_RESET ? 0 : prevOffset,
             limit: LIMIT,
             restaurants: [],
             fetching: false,
             prevRestaurants: prevRestaurants || []
         };
 
-        console.log("offset", this.state.offset);
+        console.log('offset', this.state.offset);
     }
 
     // Gets geolocation info if enabled
-    getLocation = () => {
+    getLocation() {
         if (navigator.geolocation) {
             this.setState(
                 {
-                    message: "Getting geolocation info..."
+                    message: 'Getting geolocation info...'
                 },
                 () => {
                     navigator.geolocation.getCurrentPosition(
@@ -51,7 +52,7 @@ class App extends Component {
                                         latitude: position.coords.latitude,
                                         longitude: position.coords.longitude
                                     },
-                                    message: "Getting restaurant information..."
+                                    message: 'Getting restaurant information...'
                                 },
                                 () => {
                                     // Loads restaurants into app
@@ -62,7 +63,7 @@ class App extends Component {
                                         })
                                         .catch(err => {
                                             console.log(
-                                                "fetchRestaurants " + err
+                                                `fetchRestaurants ${err}`
                                             );
                                         });
                                 }
@@ -75,25 +76,25 @@ class App extends Component {
                             switch (error.code) {
                                 case error.PERMISSION_DENIED:
                                     message =
-                                        "User denied the request for Geolocation.";
+                                        'User denied the request for Geolocation.';
                                     break;
                                 case error.POSITION_UNAVAILABLE:
                                     message =
-                                        "Location information is unavailable.";
+                                        'Location information is unavailable.';
                                     break;
                                 case error.TIMEOUT:
                                     message =
-                                        "The request to get user location timed out.";
+                                        'The request to get user location timed out.';
                                     break;
                                 case error.UNKNOWN_ERROR:
-                                    message = "An unknown error occurred.";
+                                    message = 'An unknown error occurred.';
                                     break;
                                 default:
                                     break;
                             }
 
                             this.setState({
-                                message: message
+                                message
                             });
                         }
                     );
@@ -101,39 +102,39 @@ class App extends Component {
             );
         } else {
             this.setState({
-                message: "Geolocation is not supported by this browser."
+                message: 'Geolocation is not supported by this browser.'
             });
         }
-    };
+    }
 
     // Makes API call to backend to fetch restaurants in bulk
-    fetchRestaurants = firstLoad => {
-        return new Promise((resolve, reject) => {
+    fetchRestaurants = firstLoad =>
+        new Promise((resolve, reject) => {
+            const {coords, offset, limit} = this.state;
+            let {prevRestaurants} = this.state;
             axios
                 .get(
-                    BASE_SERVER_URL +
-                        `/api/restaurants?latitude=${
-                            this.state.coords.latitude
-                        }` +
-                        `&longitude=${this.state.coords.longitude}` +
-                        `&offset=${this.state.offset}` +
-                        `&limit=${this.state.limit}`
+                    `${BASE_SERVER_URL}/api/restaurants?latitude=${
+                        coords.latitude
+                    }` +
+                        `&longitude=${coords.longitude}` +
+                        `&offset=${offset}` +
+                        `&limit=${limit}`
                 )
                 .then(res => {
                     this.setState(
                         prevState => {
                             window.localStorage.setItem(
-                                "prevOffset",
+                                'prevOffset',
                                 prevState.offset
                             );
 
                             let restaurants;
-                            let prevRestaurants = this.state.prevRestaurants;
 
                             if (firstLoad) {
-                                restaurants = res.data.filter(value => {
-                                    return !prevRestaurants.includes(value.id);
-                                });
+                                restaurants = res.data.filter(
+                                    value => !prevRestaurants.includes(value.id)
+                                );
                             } else {
                                 restaurants = res.data;
                                 prevRestaurants = [];
@@ -146,7 +147,7 @@ class App extends Component {
                                 message: null,
                                 fetching: false,
                                 offset: prevState.offset + prevState.limit,
-                                prevRestaurants: prevRestaurants
+                                prevRestaurants
                             };
                         },
                         () => {
@@ -158,15 +159,21 @@ class App extends Component {
                     reject(err);
                 });
         });
-    };
 
     // Displays next restaurant
     getNextRestaurant = () => {
+        const {
+            message,
+            restaurants,
+            fetching,
+            limit,
+            prevRestaurants
+        } = this.state;
+
         if (
-            !this.state.message &&
-            this.state.restaurants.length <=
-                Math.round(this.state.limit * 0.2) &&
-            !this.state.fetching
+            !message &&
+            restaurants.length <= Math.round(limit * 0.2) &&
+            !fetching
         ) {
             this.setState(
                 {
@@ -178,16 +185,13 @@ class App extends Component {
                 }
             );
         } else {
-            let randomNumber = this.getRandomNumber(
-                this.state.restaurants.length
-            );
-            let restaurant = this.state.restaurants[randomNumber];
+            const randomNumber = this.getRandomNumber(restaurants.length);
+            const restaurant = restaurants[randomNumber];
 
-            let prevRestaurants = this.state.prevRestaurants;
             prevRestaurants.push(restaurant.id);
 
             window.localStorage.setItem(
-                "prevRestaurants",
+                'prevRestaurants',
                 JSON.stringify(prevRestaurants)
             );
 
@@ -202,21 +206,21 @@ class App extends Component {
                         (_, i) => i !== randomNumber
                     ),
                     message: null,
-                    prevRestaurants: prevRestaurants
+                    prevRestaurants
                 }),
                 () => {
-                    console.log(this.state.restaurants);
+                    console.log(restaurants);
                 }
             );
         }
     };
 
-    getRandomNumber = max => {
-        return Math.floor(Math.random() * max);
-    };
+    getRandomNumber = max => Math.floor(Math.random() * max);
 
     render() {
-        if (!this.state.message && !this.state.coords) {
+        const {message, coords, restaurant} = this.state;
+
+        if (!message && !coords) {
             return (
                 <div className="App">
                     <Button
@@ -224,32 +228,32 @@ class App extends Component {
                         variant="contained"
                         color="primary"
                     >
-                        Show nearby restaurants{" "}
-                    </Button>{" "}
+                        Show nearby restaurants
+                    </Button>
                 </div>
             );
-        } else if (!this.state.message && this.state.restaurant) {
+        }
+        if (!message && restaurant) {
             return (
                 <div className="App">
-                    <h2> {this.state.restaurant.name} </h2>{" "}
-                    <h2> {this.state.restaurant.rating} </h2>{" "}
-                    <h2> {this.state.restaurant.location} </h2>{" "}
+                    <h2> {restaurant.name} </h2>
+                    <h2> {restaurant.rating} </h2>
+                    <h2> {restaurant.location} </h2>
                     <Button
                         onClick={this.getNextRestaurant}
                         variant="contained"
                         color="primary"
                     >
-                        Shuffle{" "}
-                    </Button>{" "}
-                </div>
-            );
-        } else {
-            return (
-                <div className="App">
-                    <h2> {this.state.message} </h2>{" "}
+                        Shuffle
+                    </Button>
                 </div>
             );
         }
+        return (
+            <div className="App">
+                <h2>{message} </h2>
+            </div>
+        );
     }
 }
 
