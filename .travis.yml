@@ -6,3 +6,6 @@ node_js:
 install: 
   - npm run install-client
   - npm run install-server
+
+script:
+  - npm run test-client
