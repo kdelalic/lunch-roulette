@@ -8,7 +8,7 @@
     "start-server": "cd server && npm run server",
     "install-client": "cd client && npm install",
     "install-server": "cd server && npm install",
-    "test-client": "cd client && npm test"
+    "test-client": "cd client && npm test -- --coverage"
   },
   "repository": {
     "type": "git",
