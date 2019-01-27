@@ -7,7 +7,7 @@ install:
   - npm run install-client
   - npm run install-server
 
-before-script:
+before_script:
   - npm run start-server
 
 script:
