@@ -13,7 +13,10 @@ class App extends Component {
 
         // window.localStorage.clear();
 
+        // Previous offset in the list of restaurants
         const prevOffset = parseInt(window.localStorage.getItem("prevOffset"));
+
+        // List of previous restaurants
         const prevRestaurants = JSON.parse(
             window.localStorage.getItem("prevRestaurants")
         );
@@ -23,9 +26,7 @@ class App extends Component {
 
         this.state = {
             offset:
-                isNaN(prevOffset) || prevOffset > RESTAURANT_RESET
-                    ? 0
-                    : prevOffset,
+                isNaN(prevOffset) || prevOffset > RESTAURANT_RESET ? 0 : prevOffset,
             limit: LIMIT,
             restaurants: [],
             fetching: false,
@@ -35,25 +36,54 @@ class App extends Component {
         console.log("offset", this.state.offset);
     }
 
-    // Gets geolocation info if enabled
+    // Gets geolocation info
     getLocation = () => {
+        // Checks if geolocation feature exists in browser
         if (navigator.geolocation) {
+            // Sets message state for getting geolocation
             this.setState(
                 {
                     message: "Getting geolocation info..."
                 },
                 () => {
+                    // Gets gps info
                     navigator.geolocation.getCurrentPosition(
                         position => {
-                            this.setState(
-                                {
-                                    coords: {
-                                        latitude: position.coords.latitude,
-                                        longitude: position.coords.longitude
-                                    },
-                                    message: "Getting restaurant information..."
+                            console.log(position.coords.latitude, position.coords.longitude)
+                            // Sets geolocation state
+                            this.setState(prevState => {
+                                    // Gets previous gps coordinates from local storage
+                                    const prevCoords = JSON.parse(window.localStorage.getItem("prevCoords"));
+
+                                    let offset = prevState.offset; 
+                                    let restaurants = prevState.restaurants;
+        
+                                    // Checks if previous gps location is different than 
+                                    // current gps location by magnitude of ~1km
+                                    // Resets offset and restaurants list if true,
+                                    // otherwise we can reuse previous session's already fetched info
+                                    if (prevCoords && (Math.abs(position.coords.latitude - prevCoords.latitude) > 0.01 || 
+                                        Math.abs(position.coords.longitude - prevCoords.longitude) > 0.01)) {
+                                            offset = 0;
+                                            restaurants = [];
+                                        }
+
+                                    return {
+                                        coords: {
+                                            latitude: position.coords.latitude,
+                                            longitude: position.coords.longitude
+                                        },
+                                        message: "Getting restaurant information...",
+                                        offset: offset,
+                                        restaurants: restaurants
+                                    }
                                 },
                                 () => {
+                                    // Stores current coordinates in localStorage for next session
+                                    window.localStorage.setItem(
+                                        "prevCoords",
+                                        JSON.stringify(this.state.coords)
+                                    );
                                     // Loads restaurants into app
                                     this.fetchRestaurants(true)
                                         .then(() => {
@@ -122,19 +152,23 @@ class App extends Component {
                 .then(res => {
                     this.setState(
                         prevState => {
+                            // Sets previous offset in local storage
                             window.localStorage.setItem(
                                 "prevOffset",
                                 prevState.offset
                             );
 
                             let restaurants;
-                            let prevRestaurants = this.state.prevRestaurants;
+                            let prevRestaurants = prevState.prevRestaurants;
 
                             if (firstLoad) {
+                                // On first restaurant load this filters out the previous
+                                // restaurants from the potential ones that can be showed to user
                                 restaurants = res.data.filter(value => {
                                     return !prevRestaurants.includes(value.id);
                                 });
                             } else {
+                                // If not first load, sets restaurants to response
                                 restaurants = res.data;
                                 prevRestaurants = [];
                             }
@@ -168,6 +202,8 @@ class App extends Component {
                 Math.round(this.state.limit * 0.2) &&
             !this.state.fetching
         ) {
+            // If number of restaurants in state are less than 20% of limit,
+            // then more restaurants are loaded into the state
             this.setState(
                 {
                     fetching: true
@@ -178,6 +214,7 @@ class App extends Component {
                 }
             );
         } else {
+            // Random number used to pick random restaurant from restaurant array in state
             let randomNumber = this.getRandomNumber(
                 this.state.restaurants.length
             );
@@ -186,6 +223,7 @@ class App extends Component {
             let prevRestaurants = this.state.prevRestaurants;
             prevRestaurants.push(restaurant.id);
 
+            // Updates previous restaurants in local storage
             window.localStorage.setItem(
                 "prevRestaurants",
                 JSON.stringify(prevRestaurants)
@@ -198,6 +236,7 @@ class App extends Component {
                         rating: restaurant.rating,
                         location: restaurant.location.address1
                     },
+                    // Filters out current restaurant from potential restaurants
                     restaurants: prevState.restaurants.filter(
                         (_, i) => i !== randomNumber
                     ),
@@ -211,11 +250,13 @@ class App extends Component {
         }
     };
 
+    // Random number generator
     getRandomNumber = max => {
         return Math.floor(Math.random() * max);
     };
 
     render() {
+        // Initial state
         if (!this.state.message && !this.state.coords) {
             return (
                 <div className="App">
@@ -228,6 +269,7 @@ class App extends Component {
                     </Button>{" "}
                 </div>
             );
+        // State where there is a restaurant loaded
         } else if (!this.state.message && this.state.restaurant) {
             return (
                 <div className="App">
@@ -243,6 +285,7 @@ class App extends Component {
                     </Button>{" "}
                 </div>
             );
+        // Message state
         } else {
             return (
                 <div className="App">

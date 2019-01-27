@@ -1,0 +1,1 @@
+[![Build Status](https://travis-ci.com/kdelalic/lunch-roulette.svg?token=zzzrDLkmTq4zebktZu48&branch=master)](https://travis-ci.com/kdelalic/lunch-roulette)
