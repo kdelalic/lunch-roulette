@@ -9,6 +9,7 @@ install:
 
 before_script:
   - npm run start-server
+  - sleep 10
 
 script:
   - npm run test-client
