@@ -3,7 +3,8 @@
     "version": "1.0.0",
     "main": "app.js",
     "scripts": {
-        "server": "export NODE_TLS_REJECT_UNAUTHORIZED=1 && nodemon app.js"
+        "start-dev": "export NODE_TLS_REJECT_UNAUTHORIZED=1 && nodemon app.js",
+        "start": "export NODE_TLS_REJECT_UNAUTHORIZED=1 && node app.js &"
     },
     "author": "",
     "license": "ISC",
