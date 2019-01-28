@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import Button from "@material-ui/core/Button";
+import {Button} from "@material-ui/core";
 import axios from "axios";
 import "./App.css";
 
@@ -261,6 +261,7 @@ class App extends Component {
             return (
                 <div className="App">
                     <Button
+                        id="show-restaurants"
                         onClick={this.getLocation}
                         variant="contained"
                         color="primary"
@@ -289,7 +290,7 @@ class App extends Component {
         } else {
             return (
                 <div className="App">
-                    <h2> {this.state.message} </h2>{" "}
+                    <h2 id="message"> {this.state.message} </h2>{" "}
                 </div>
             );
         }
